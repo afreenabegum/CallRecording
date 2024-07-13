@@ -31,19 +31,18 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-//        Intent intentService = new Intent(this, CallAPIService.class);
-//        startService(intentService);
 
-//        requestPermissions();
         // Checks whether permission in app is given or not
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED||
-        ContextCompat.checkSelfPermission(this, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED
+         ContextCompat.checkSelfPermission(this, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED
 
-        ) {
+        )
+        {
+
             // Show Pop up for Permissions (will create Permission Pops)
             ActivityCompat.requestPermissions(this,
                     new String[]{
@@ -55,19 +54,6 @@ public class MainActivity extends AppCompatActivity {
                     },
                     REQUEST_CODE);
         }
-
-//    private void requestPermissions() {
-//        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE)
-//                != PackageManager.PERMISSION_GRANTED ||
-//                ContextCompat.checkSelfPermission(this, android.Manifest.permission.INTERNET) !=
-//                        PackageManager.PERMISSION_GRANTED) {
-//
-//            ActivityCompat.requestPermissions(this, new String[]{
-//                    android.Manifest.permission.READ_PHONE_STATE,
-//                    android.Manifest.permission.INTERNET
-//            }, REQUEST_CODE);
-//        }
-//    }
 
     }
     public void onRequestPermissionsResult ( int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){

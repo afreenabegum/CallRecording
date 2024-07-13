@@ -21,7 +21,7 @@ public class CallAPIReceiver extends BroadcastReceiver {
         if (Intent.ACTION_NEW_OUTGOING_CALL.equals(action)) {
             String outgoingNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
             isOutgoingCall = true;
-            Log.d("OutgoingCallReceiver", "Call Outgoing - Ringing " + outgoingNumber);
+            Log.d("OutgoingCallReceiver", "Outgoing  Call- Ringing " + outgoingNumber);
         }
 
         else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
@@ -48,8 +48,6 @@ public class CallAPIReceiver extends BroadcastReceiver {
                 //Start the service
                 Intent serviceIntent = new Intent(context, CallAPIService.class);
                 serviceIntent.putExtra("IncomingNumber", incomingNumber);
-
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(serviceIntent);
                 }

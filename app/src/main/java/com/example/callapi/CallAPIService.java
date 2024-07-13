@@ -10,19 +10,16 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class CallAPIService extends Service {
 
@@ -36,11 +33,7 @@ public class CallAPIService extends Service {
         return null;
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mediaRecorder = new MediaRecorder();
-    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -78,31 +71,36 @@ public class CallAPIService extends Service {
 
     private void startRecording(String incomingNumber) {
 
-        // Todo check the logic
         if (isRecording) {
             Log.d("TAG", "Already recording, return");
             return;
         }
 
-
         try{
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-            mediaRecorder.setOutputFile(pathToSaveFile());
+            mediaRecorder.setOutputFile(pathToSaveFile(number));
+            mediaRecorder.prepare();
+            mediaRecorder.start();
 
-                mediaRecorder.prepare();
-                mediaRecorder.start();
                 isRecording = true;
-                Toast.makeText(this, "Recording Started", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "RecordingStarted", Toast.LENGTH_SHORT).show();
                 Log.d("RecordStart", "started Recording: ");
-            } catch (Exception e) {
-                Log.d("RecordFailed", "Recording Failed " + e);
-
             }
+            catch (IOException e) {
+                Log.e("CallRecordingService", "Recording failed", e);
+                stopSelf(); // Stop the service if recording fails
+             }
+
+            catch (IllegalStateException e) {
+                Log.e("CallRecordingService", "Recording failed due to illegal state", e);
+                stopSelf(); // Stop the service if recording fails
+        }
     }
 
-    private String pathToSaveFile(){
+    private String pathToSaveFile(String number){
 
             File file_Directory;
 
@@ -112,28 +110,33 @@ public class CallAPIService extends Service {
                 file_Directory  = Environment.getExternalStoragePublicDirectory
                         (Environment.DIRECTORY_DOWNLOADS);
 
-                // contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS); other paths to save file
-            }else {
+            }
+            else {
                 file_Directory = contextWrapper.getFilesDir();
             }
-            File file = new File(file_Directory,"testRecording"+ number +".mp3");
-            System.currentTimeMillis();
-            return file.getPath();
+//            String timeStamp =
+//                    new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(new Date());
+//            String fileName = "Recording_" + timeStamp;
+//            File file = new File(file_Directory,fileName + this.number +".m4a");
+//            return file.getPath();
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        File file = new File(file_Directory, "Recording_" + number + "_" + timeStamp +
+                ".mp3");
+        return file.getPath();
     }
 
-    private void stopRecording() {
-        if(isRecording){
-            mediaRecorder.stop();
-            mediaRecorder.reset();
-            isRecording = false;
-            Toast.makeText(this, "Recording Stopped", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        stopRecording();
+        if (isRecording) {
+            try {
+                mediaRecorder.stop();
+            } catch (RuntimeException e) {
+                Log.e("RecordStop", "Stopped Recording: ", e);
+            }
+            mediaRecorder.release();
+            isRecording = false;
+        }
     }
 }
 
